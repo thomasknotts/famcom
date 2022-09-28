@@ -1,4 +1,4 @@
-# classes is part of famcom for comparing compounds in the DIPPR database.  #
+# classes is part of famcom for comparing DIPPR compounds.                  #
 # Copyright (C) 2022 Thomas Allen Knotts IV - All Rights Reserved           #
 #                                                                           #
 # This program is free software you can redistribute it and/or modify       #
@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License         #
 # along with this program.  If not, see httpwww.gnu.orglicenses.            #
 # ========================================================================= #
-# classes.py                                                                #
+# read_compound.py                                                          #
 #                                                                           #
 # Thomas A. Knotts IV                                                       #
 # Brigham Young University                                                  #
@@ -26,13 +26,21 @@
 # ========================================================================= #
 
 """
-This module is part of famcom. It defines the classes needed for program. 
-The classes are below.
+This module is part of famcom. It read the data in a .famcom file into
+a variable of class compound.
 
     compound   a class that holds the information for each compound
     tprop      a class holding the information for a temperature-dependent
                  property
 """
+import sys, os, string
+
+def isnumber(s):
+    try:
+        float(s)
+        return(True)
+    except ValueError:
+        return(False)
 
 # The class for each tdep property
 class tprop:
@@ -102,3 +110,40 @@ class compound:
         self.SVP=tprop()
         self.LVS=tprop()
         self.VVS=tprop()
+    #@classmethod
+    def read_compound(self,fn):
+        # check to see if the input files exists
+        if not os.path.isfile(fn): 
+            print("Input file \"" + fn +"\" does not exist.\n")
+            import warnings
+            warnings.filterwarnings("ignore")
+            sys.exit("Error: Input file missing.")
+        
+        # Parse the input file
+        fi=open(fn)                   # open the file
+        content=fi.readlines()        # read the file into a variable
+        fi.close()                    # close the file
+        data={}                       # make a dicitonary to hold the keywords and values
+        for line in content:          # interate through each line of text in file
+            linetext=line.strip()     # get rid of whitespace on each end of line
+            if not linetext: continue # skip empty lines
+            # Remove the end of line comment (everything after '#') and
+            # and split the lines at all commas
+            linetext=linetext.split('#',1)[0].split(',')
+            if not linetext: continue # skip a line that was only comments
+            # Separate the line into the key and the value pair
+            key=linetext[0]
+            val=linetext[1:]
+            # Place the key and value into the dictionary
+            data[key]=val
+        #MWget=data.get('MW')
+        #print(MWget)
+        #print(isnumber(MWget[0]))
+        #if (isnumber(MWget[0])): self.MW=float(MWget[0])
+        self.MW=float(data.get('MW')[0])
+        self.TC=float(data.get('TC')[0])
+        self.PC=float(data.get('PC')[0])
+        self.VC=float(data.get('VC')[0])
+        self.ZC=float(data.get('ZC')[0])
+        self.MP=float(data.get('MP')[0])
+        self.TPT=float(data.get('TPT')[0])        
