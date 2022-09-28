@@ -25,69 +25,69 @@
 # Version 1.0 - September 2022                                              #
 # ========================================================================= #
 
-
+"""
 This module is part of famcom. It defines the classes needed for program. 
 The classes are below.
 
     compound   a class that holds the information for each compound
     tprop      a class holding the information for a temperature-dependent
                  property
+"""
 
 # The class for each tdep property
 class tprop:
     def __init__(self):
-        #self.prop=prop       # property name
-        self.tmin=0.0      # min temp of correlation
-        self.tmax=0.0      # max temp of correlation
-        self.eq=0.0        # correlation eqation number
-        self.a=0.0         # a coefficient of correlation
-        self.b=0.0         # b coefficient of correlation
-        self.c=0.0         # c coefficient of correlation
-        self.d=0.0         # d coefficient of correlation
-        self.e=0.0         # e coefficient of correlation
-        self.f=0.0         # f coefficient of correlation
-        self.g=0.0         # g coefficient of correlation
+        self.tmin=float("nan")  # min temp of correlation
+        self.tmax=float("nan")  # max temp of correlation
+        self.eq=float("nan")    # correlation eqation number
+        self.a=float("nan")     # a coefficient of correlation
+        self.b=float("nan")     # b coefficient of correlation
+        self.c=float("nan")     # c coefficient of correlation
+        self.d=float("nan")     # d coefficient of correlation
+        self.e=float("nan")     # e coefficient of correlation
+        self.f=float("nan")     # f coefficient of correlation
+        self.g=float("nan")     # g coefficient of correlation
 
         
 # The class to hold the compound information
 class compound:
-    def __init__(self):
-        self.name=None
-        self.ChemID=None
-        self.MW=0.0
-        self.TC=0.0
-        self.PC=0.0
-        self.VC=0.0
-        self.ZC=0.0
-        self.MP=0.0
-        self.TPT=0.0
-        self.TPP=0.0
-        self.NBP=0.0
-        self.LVOL=0.0
-        self.HFOR=0.0
-        self.GFOR=0.0
-        self.ENT=0.0
-        self.HSTD=0.0
-        self.GSTD=0.0
-        self.SSTD=0.0
-        self.HFUS=0.0
-        self.HCOM=0.0
-        self.ACEN=0.0
-        self.RG=0.0
-        self.SOLP=0.0
-        self.DM=0.0
-        self.VDWA=0.0
-        self.VDWV=0.0
-        self.RI=0.0
-        self.FP=0.0
-        self.FLVL=0.0
-        self.FLVU=0.0
-        self.FLTL=0.0
-        self.FLTU=0.0
-        self.AIT=0.0
-        self.HSUB=0.0
-        self.PAR=0.0
-        self.DC=0.0
+    def __init__(self,name,id):
+        self.name=name
+        self.ChemID=int(id)
+        self.MW=float("nan")  
+        self.TC=float("nan")  
+        self.PC=float("nan")  
+        self.VC=float("nan")  
+        self.ZC=float("nan")  
+        self.MP=float("nan")  
+        self.TPT=float("nan")  
+        self.TPP=float("nan")  
+        self.NBP=float("nan")  
+        self.LVOL=float("nan")  
+        self.HFOR=float("nan")  
+        self.GFOR=float("nan")  
+        self.ENT=float("nan")  
+        self.HSTD=float("nan")  
+        self.GSTD=float("nan")  
+        self.SSTD=float("nan")  
+        self.HFUS=float("nan")  
+        self.HCOM=float("nan")  
+        self.ACEN=float("nan")  
+        self.RG=float("nan")  
+        self.SOLP=float("nan")  
+        self.DM=float("nan")  
+        self.VDWA=float("nan")  
+        self.VDWV=float("nan")  
+        self.RI=float("nan")  
+        self.FP=float("nan")  
+        self.FLVL=float("nan")  
+        self.FLVU=float("nan")  
+        self.FLTL=float("nan")  
+        self.FLTU=float("nan")  
+        self.AIT=float("nan")  
+        self.HSUB=float("nan")  
+        self.PAR=float("nan")  
+        self.DC=float("nan")  
         self.LDN=tprop()
         self.SDN=tprop()
         self.ICP=tprop()
@@ -102,7 +102,3 @@ class compound:
         self.SVP=tprop()
         self.LVS=tprop()
         self.VVS=tprop()
-   
-        
-    
-        
