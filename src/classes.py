@@ -59,9 +59,9 @@ class tprop:
         
 # The class to hold the compound information
 class compound:
-    def __init__(self,name,id):
-        self.name=name
-        self.ChemID=int(id)
+    def __init__(self):
+        self.name=None
+        self.ChemID=None
         self.MW=float("nan")  
         self.TC=float("nan")  
         self.PC=float("nan")  
@@ -120,16 +120,16 @@ class compound:
             sys.exit("Error: Input file missing.")
         
         # Parse the input file
-        fi=open(fn)                   # open the file
-        content=fi.readlines()        # read the file into a variable
-        fi.close()                    # close the file
-        data={}                       # make a dicitonary to hold the keywords and values
+        fi=open(fn)        # open the file
+        content=fi.readlines()  # read the file into a variable
+        fi.close()              # close the file
+        data={}               # make a dicitonary to hold the keywords and values
         for line in content:          # interate through each line of text in file
             linetext=line.strip()     # get rid of whitespace on each end of line
             if not linetext: continue # skip empty lines
             # Remove the end of line comment (everything after '#') and
             # and split the lines at all commas
-            linetext=linetext.split('#',1)[0].split(',')
+            linetext=linetext.split('#',1)[0].split('\t')
             if not linetext: continue # skip a line that was only comments
             # Separate the line into the key and the value pair
             key=linetext[0]
@@ -140,10 +140,39 @@ class compound:
         #print(MWget)
         #print(isnumber(MWget[0]))
         #if (isnumber(MWget[0])): self.MW=float(MWget[0])
+        self.name=data.get('Name')[0]
+        self.ChemID=int(data.get('ChemID')[0])
         self.MW=float(data.get('MW')[0])
         self.TC=float(data.get('TC')[0])
         self.PC=float(data.get('PC')[0])
         self.VC=float(data.get('VC')[0])
         self.ZC=float(data.get('ZC')[0])
         self.MP=float(data.get('MP')[0])
-        self.TPT=float(data.get('TPT')[0])        
+        self.TPT=float(data.get('TPT')[0])
+        self.TPP=float(data.get('TPP')[0])
+        self.NBP=float(data.get('NBP')[0])
+        self.LVOL=float(data.get('LVOL')[0])
+        self.HFOR=float(data.get('HFOR')[0])
+        self.GFOR=float(data.get('GFOR')[0])
+        self.ENT=float(data.get('ENT')[0])
+        self.HSTD=float(data.get('HSTD')[0])
+        self.GSTD=float(data.get('GSTD')[0])
+        self.SSTD=float(data.get('SSTD')[0])
+        self.HFUS=float(data.get('HFUS')[0])
+        self.HCOM=float(data.get('HCOM')[0])
+        self.ACEN=float(data.get('ACEN')[0])
+        self.RG=float(data.get('RG')[0])
+        self.SOLP=float(data.get('SOLP')[0])
+        self.DM=float(data.get('DM')[0])
+        self.VDWA=float(data.get('VDWA')[0])
+        self.VDWV=float(data.get('VDWV')[0])
+        self.RI=float(data.get('RI')[0])
+        self.FP=float(data.get('FP')[0])
+        self.FLVL=float(data.get('FLVL')[0])
+        self.FLTL=float(data.get('FLTL')[0])
+        self.FLVU=float(data.get('FLVU')[0])
+        self.FLTU=float(data.get('FLTU')[0])
+        self.AIT=float(data.get('AIT')[0])
+        self.HSUB=float(data.get('HSUB')[0])
+        self.PAR=float(data.get('PAR')[0])
+        self.DC=float(data.get('DC')[0])
