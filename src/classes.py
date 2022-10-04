@@ -34,6 +34,8 @@ a variable of class compound.
                  property
 """
 import sys, os, string
+import numpy as np
+import byutpl.equations.dippreqns as eq
 
 def isnumber(s):
     try:
@@ -43,74 +45,59 @@ def isnumber(s):
         return(False)
 
 # The class for each tdep property
-class tprop:
+class tcoeff:
     def __init__(self):
+        self.prop=None          # property
         self.tmin=float("nan")  # min temp of correlation
         self.tmax=float("nan")  # max temp of correlation
         self.eq=float("nan")    # correlation eqation number
-        self.a=float("nan")     # a coefficient of correlation
-        self.b=float("nan")     # b coefficient of correlation
-        self.c=float("nan")     # c coefficient of correlation
-        self.d=float("nan")     # d coefficient of correlation
-        self.e=float("nan")     # e coefficient of correlation
-        self.f=float("nan")     # f coefficient of correlation
-        self.g=float("nan")     # g coefficient of correlation
-
+        self.c=np.array([])
         
 # The class to hold the compound information
 class compound:
     def __init__(self):
         self.name=None
         self.ChemID=None
-        self.MW=float("nan")  
-        self.TC=float("nan")  
-        self.PC=float("nan")  
-        self.VC=float("nan")  
-        self.ZC=float("nan")  
-        self.MP=float("nan")  
-        self.TPT=float("nan")  
-        self.TPP=float("nan")  
-        self.NBP=float("nan")  
-        self.LVOL=float("nan")  
-        self.HFOR=float("nan")  
-        self.GFOR=float("nan")  
-        self.ENT=float("nan")  
-        self.HSTD=float("nan")  
-        self.GSTD=float("nan")  
-        self.SSTD=float("nan")  
-        self.HFUS=float("nan")  
-        self.HCOM=float("nan")  
-        self.ACEN=float("nan")  
-        self.RG=float("nan")  
-        self.SOLP=float("nan")  
-        self.DM=float("nan")  
-        self.VDWA=float("nan")  
-        self.VDWV=float("nan")  
-        self.RI=float("nan")  
-        self.FP=float("nan")  
-        self.FLVL=float("nan")  
-        self.FLVU=float("nan")  
-        self.FLTL=float("nan")  
-        self.FLTU=float("nan")  
-        self.AIT=float("nan")  
-        self.HSUB=float("nan")  
-        self.PAR=float("nan")  
-        self.DC=float("nan")  
-        self.LDN=tprop()
-        self.SDN=tprop()
-        self.ICP=tprop()
-        self.LCP=tprop()
-        self.SCP=tprop()
-        self.HVP=tprop()
-        self.SVR=tprop()
-        self.ST=tprop()
-        self.LTC=tprop()
-        self.VTC=tprop()
-        self.VP=tprop()
-        self.SVP=tprop()
-        self.LVS=tprop()
-        self.VVS=tprop()
-    #@classmethod
+        self.MW=float("nan")
+        self.TC=float("nan")
+        self.PC=float("nan")
+        self.VC=float("nan")
+        self.ZC=float("nan")
+        self.MP=float("nan")
+        self.TPT=float("nan")
+        self.TPP=float("nan")
+        self.NBP=float("nan")
+        self.LVOL=float("nan")
+        self.HFOR=float("nan")
+        self.GFOR=float("nan")
+        self.ENT=float("nan")
+        self.HSTD=float("nan")
+        self.GSTD=float("nan")
+        self.SSTD=float("nan")
+        self.HFUS=float("nan")
+        self.HCOM=float("nan")
+        self.ACEN=float("nan")
+        self.RG=float("nan")
+        self.SOLP=float("nan")
+        self.DM=float("nan")
+        self.VDWA=float("nan")
+        self.VDWV=float("nan")
+        self.RI=float("nan")
+        self.FP=float("nan")
+        self.FLVL=float("nan")
+        self.FLVU=float("nan")
+        self.FLTL=float("nan")
+        self.FLTU=float("nan")
+        self.AIT=float("nan")
+        self.HSUB=float("nan")
+        self.PAR=float("nan")
+        self.DC=float("nan")
+        tprops=['LDN','SDN','ICP','LCP','SCP','HVP','SVR','ST', \
+                'LTC','VTC','STC','VP','SVP','LVS','VVS']
+        self.coeff={}
+        for i in tprops:
+            self.coeff[i]=tcoeff()
+
     def read_compound(self,fn):
         # check to see if the input files exists
         if not os.path.isfile(fn): 
@@ -126,6 +113,7 @@ class compound:
         data={}               # make a dicitonary to hold the keywords and values
         for line in content:          # interate through each line of text in file
             linetext=line.strip()     # get rid of whitespace on each end of line
+            linetext=linetext.rstrip('\t') # remove triling tabs
             if not linetext: continue # skip empty lines
             # Remove the end of line comment (everything after '#') and
             # and split the lines at all commas
@@ -176,3 +164,63 @@ class compound:
         self.HSUB=float(data.get('HSUB')[0])
         self.PAR=float(data.get('PAR')[0])
         self.DC=float(data.get('DC')[0])
+        
+        # tdep coefficients
+        tprops=['LDN','SDN','ICP','LCP','SCP','HVP','SVR','ST', \
+                'LTC','VTC','STC','VP','SVP','LVS','VVS']
+        for i in tprops:
+            if i in data: # check if prop was in file
+                self.coeff[i].eq=int(data.get(i)[0])
+                self.coeff[i].tmin=float(data.get(i)[1])
+                self.coeff[i].tmax=float(data.get(i)[2])
+                self.coeff[i].c=np.array(data.get(i)[3:]).astype(float)
+                
+    def LDN(self,t):
+        if self.coeff['LDN'].eq == 116 or self.coeff['LDN'].eq == 119: t = 1-t/self.TC
+        return(eq.eq(t,self.coeff['LDN'].c,self.coeff['LDN'].eq))
+    
+    def SDN(self,t):
+        return(eq.eq(t,self.coeff['SDN'].c,self.coeff['SDN'].eq))
+    
+    def ICP(self,t):
+        return(eq.eq(t,self.coeff['ICP'].c,self.coeff['ICP'].eq))
+    
+    def LCP(self,t):
+        if self.coeff['LCP'].eq == 114 or self.coeff['LCP'].eq == 124: t = 1-t/self.TC
+        return(eq.eq(t,self.coeff['LCP'].c,self.coeff['LCP'].eq))
+    
+    def SCP(self,t):
+        return(eq.eq(t,self.coeff['SCP'].c,self.coeff['SCP'].eq))
+    
+    def HVP(self,t):
+        if self.coeff['HVP'].eq == 106: t = t/self.TC
+        return(eq.eq(t,self.coeff['HVP'].c,self.coeff['HVP'].eq))
+    
+    def SVR(self,t):
+        return(eq.eq(t,self.coeff['SVR'].c,self.coeff['SVR'].eq))
+    
+    def ST(self,t):
+        if self.coeff['ST'].eq == 106: t = t/self.TC
+        return(eq.eq(t,self.coeff['ST'].c,self.coeff['ST'].eq))
+    
+    def LTC(self,t):
+        if self.coeff['LTC'].eq == 123: t = 1-t/self.TC
+        return(eq.eq(t,self.coeff['LTC'].c,self.coeff['LTC'].eq))
+    
+    def VTC(self,t):
+        return(eq.eq(t,self.coeff['VTC'].c,self.coeff['VTC'].eq))
+    
+    def STC(self,t):
+        return(eq.eq(t,self.coeff['STC'].c,self.coeff['STC'].eq))
+    
+    def VP(self,t):
+        return(eq.eq(t,self.coeff['VP'].c,self.coeff['VP'].eq))
+    
+    def SVP(self,t):
+        return(eq.eq(t,self.coeff['SVP'].c,self.coeff['SVP'].eq))
+    
+    def LVS(self,t):
+        return(eq.eq(t,self.coeff['LVS'].c,self.coeff['LVS'].eq))
+    
+    def VVS(self,t):
+        return(eq.eq(t,self.coeff['VVS'].c,self.coeff['VVS'].eq))
