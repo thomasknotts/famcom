@@ -125,12 +125,8 @@ class compound:
             val=linetext[1:]
             # Place the key and value into the dictionary
             data[key]=val
-        #MWget=data.get('MW')
-        #print(MWget)
-        #print(isnumber(MWget[0]))
-        #if (isnumber(MWget[0])): self.MW=float(MWget[0])
         self.name=data.get('Name')[0]
-        self.ChemID=int(data.get('ChemID')[0])
+        self.ChemID=float(data.get('ChemID')[0])
         self.MW=float(data.get('MW')[0])
         self.TC=float(data.get('TC')[0])
         self.PC=float(data.get('PC')[0])
@@ -226,59 +222,66 @@ class compound:
     def VVS(self,t):
         return(eq.eq(t,self.coeff['VVS'].c,self.coeff['VVS'].eq))
         
-def cgraph(c,p):
+def graph(c,p):
     # check if `c` is a list
     if type(c) != list:
         print('Graphing requires a list of compound objects which was not supplied.')
-        #return(False)
-    # sort c on MW
-    c.sort(key=lambda x: x.MW)
-    # Determine the index of the compounds in `c` have data for property `p`
-    cindex=[i for i, x in enumerate(c) if not math.isnan(getattr(x,p))]
+        return()
+   
+    # check whether the property is constant, tdep, or not a DIPPR prop
+    cprops=['MW','TC','PC','VC','ZC','MP','TPT','TPP','NBP','LVOL','HFOR','GFOR', \
+            'ENT','HSTD','GSTD','SSTD','HFUS','HCOM','ACEN','RG','SOLP','DM', \
+            'VDWA','VDWV','RI','FP','FLVL','FLTL','FLVU','FLTU','AIT','HSUB', \
+            'PAR','DC']
+    tprops=['LDN','SDN','ICP','LCP','SCP','HVP','SVR','ST', \
+            'LTC','VTC','STC','VP','SVP','LVS','VVS']
     
+    ptype=''
+    if p in cprops: ptype='const'
+    elif p not in tprops:
+        print('Property ' + p + ' is not a DIPPR property.')
+        return()
+    
+    
+    # sort c on MW if MW is available
+    mwindex=[i for i, x in enumerate(c) if not math.isnan(x.MW)]
+    if(bool(mwindex)): c.sort(key=lambda x: x.MW)
+    
+    # Determine the index of the compounds in `c` have data for property `p`
+    if ptype == 'const': cindex=[i for i, x in enumerate(c) if not math.isnan(getattr(x,p))]
+    else: cindex=[i for i, x in enumerate(c) if not math.isnan(x.coeff[p].eq)]
+ 
     if not cindex: # only graph if data are present
-        print('No data for ' + p + ' were found in the supplied files.')
-        #return(False)
+        print('No data for ' + p + ' were found in the supplied files.') 
+        return()
     else:
         names=[c[i].name for i in cindex]
-        xdata=[c[i].MW for i in cindex]
-        ydata=[getattr(c[i],p) for i in cindex]
-        plt.plot(xdata,ydata,'o')
-        plt.ylabel(p)
-        plt.xlabel('MW')
-        plt.title(p + ' vs MW')
-        plt.show()
-        print(names)
-        
-def tgraph(c,p):
-    # check if `c` is a list
-    if type(c) != list:
-        print('Graphing requires a list of compound objects which was not supplied.')
-        #return(False)
-    # sort c on MW
-    c.sort(key=lambda x: x.MW)
-    # Determine the index of the compounds in `c` have data for property `p`
-    cindex=[i for i, x in enumerate(c) if not math.isnan(x.coeff[p].eq)]
-    
-    if not cindex: # only graph if data are present
-        print('No data for ' + p + ' were found in the supplied files.')
-        #return(False)
-    else:
-        names=[c[i].name for i in cindex]  
-        for i in range(len(cindex)):
-            xdata=np.linspace(c[cindex[i]].coeff[p].tmin, c[cindex[i]].coeff[p].tmax, 50)
-            yf=getattr(c[cindex[i]],p)
-            ydata=yf(xdata)
-            if p in ['VP','SVP','LVS']:
-                xdata=1.0/xdata
-                ydata=np.log(ydata)
-            plt.plot(xdata,ydata,label=c[cindex[i]].name)
-        if p in ['VP','SVP','LVS']:
-            plt.ylabel('ln(' + p +')')
-            plt.xlabel('1/T')
-        else:
+        if ptype == 'const':
+            xdata=[c[i].MW for i in cindex]
+            ydata=[getattr(c[i],p) for i in cindex]
+            plt.plot(xdata,ydata,'o')
             plt.ylabel(p)
-            plt.xlabel('T')
-        plt.title('Temperature Behavior of ' + p)
-        plt.legend()
+            plt.xlabel('MW')
+            plt.title(p + ' vs MW')
+            #print(names)
+        else:
+            names=[c[i].name for i in cindex]  
+            for i in range(len(cindex)):
+                xdata=np.linspace(c[cindex[i]].coeff[p].tmin, c[cindex[i]].coeff[p].tmax, 50)
+                yf=getattr(c[cindex[i]],p)
+                ydata=yf(xdata)
+                if p in ['VP','SVP','LVS']:
+                    xdata=1.0/xdata
+                    ydata=np.log(ydata)
+                plt.plot(xdata,ydata,label=c[cindex[i]].name)
+            if p in ['VP','SVP','LVS']:
+                plt.ylabel('ln(' + p +')')
+                plt.xlabel('1/T')
+            else:
+                plt.ylabel(p)
+                plt.xlabel('T')
+            plt.title('Temperature Behavior of ' + p)
+            plt.legend(loc=(1.04, 0))
         plt.show()
+ 
+ 
