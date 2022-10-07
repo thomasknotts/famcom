@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License         #
 # along with this program.  If not, see httpwww.gnu.orglicenses.            #
 # ========================================================================= #
-# read_compound.py                                                          #
+# famcom.py                                                                 #
 #                                                                           #
 # Thomas A. Knotts IV                                                       #
 # Brigham Young University                                                  #
@@ -26,12 +26,14 @@
 # ========================================================================= #
 
 """
-This module is part of famcom. It read the data in a .famcom file into
-a variable of class compound.
+This module reads the data in a compound file into
+a variable of class `compound`.
 
-    compound   a class that holds the information for each compound
-    tprop      a class holding the information for a temperature-dependent
-                 property
+    compound       a class that holds the information for each compound
+    tcoeff         a class holding the information for a temperature-dependent
+                     property
+    read_compound  a method from class `compound` that reads in the data 
+                     for a compound into a text file 
 """
 import sys, os, string, math
 import matplotlib.pyplot as plt
@@ -52,7 +54,7 @@ class tcoeff:
         self.tmin=float("nan")  # min temp of correlation
         self.tmax=float("nan")  # max temp of correlation
         self.eq=float("nan")    # correlation eqation number
-        self.c=np.array([])
+        self.c=np.array([])     # coefficients
         
 # The class to hold the compound information
 class compound:
@@ -100,6 +102,15 @@ class compound:
             self.coeff[i]=tcoeff()
 
     def read_compound(self,fn):
+    """reads the property data into the self `compound` object
+    
+    Parameter
+    ----------
+    fn : string
+         name of file containing the data for the compound in 
+         'key\tvalue(s)' form
+        
+    """
         # check to see if the input files exists
         if not os.path.isfile(fn): 
             print("Input file \"" + fn +"\" does not exist.\n")
@@ -136,43 +147,6 @@ class compound:
         for i in cprops:
             if i in data: # check if prop was in file
                 setattr(self, i, float(data.get(i)[0]))
- 
-        # self.Name=data.get('Name')[0]
-        # self.ChemID=int(data.get('ChemID')[0])
-        # self.MW=float(data.get('MW')[0])
-        # self.TC=float(data.get('TC')[0])
-        # self.PC=float(data.get('PC')[0])
-        # self.VC=float(data.get('VC')[0])
-        # self.ZC=float(data.get('ZC')[0])
-        # self.MP=float(data.get('MP')[0])
-        # self.TPT=float(data.get('TPT')[0])
-        # self.TPP=float(data.get('TPP')[0])
-        # self.NBP=float(data.get('NBP')[0])
-        # self.LVOL=float(data.get('LVOL')[0])
-        # self.HFOR=float(data.get('HFOR')[0])
-        # self.GFOR=float(data.get('GFOR')[0])
-        # self.ENT=float(data.get('ENT')[0])
-        # self.HSTD=float(data.get('HSTD')[0])
-        # self.GSTD=float(data.get('GSTD')[0])
-        # self.SSTD=float(data.get('SSTD')[0])
-        # self.HFUS=float(data.get('HFUS')[0])
-        # self.HCOM=float(data.get('HCOM')[0])
-        # self.ACEN=float(data.get('ACEN')[0])
-        # self.RG=float(data.get('RG')[0])
-        # self.SOLP=float(data.get('SOLP')[0])
-        # self.DM=float(data.get('DM')[0])
-        # self.VDWA=float(data.get('VDWA')[0])
-        # self.VDWV=float(data.get('VDWV')[0])
-        # self.RI=float(data.get('RI')[0])
-        # self.FP=float(data.get('FP')[0])
-        # self.FLVL=float(data.get('FLVL')[0])
-        # self.FLTL=float(data.get('FLTL')[0])
-        # self.FLVU=float(data.get('FLVU')[0])
-        # self.FLTU=float(data.get('FLTU')[0])
-        # self.AIT=float(data.get('AIT')[0])
-        # self.HSUB=float(data.get('HSUB')[0])
-        # self.PAR=float(data.get('PAR')[0])
-        # self.DC=float(data.get('DC')[0])
         
         # tdep coefficients
         tprops=['LDN','SDN','ICP','LCP','SCP','HVP','SVR','ST', \
@@ -185,56 +159,258 @@ class compound:
                 self.coeff[i].c=np.array(data.get(i)[3:]).astype(float)
                 
     def LDN(self,t):
+    """liquid density of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the liquid density of the compound at temperature `t` in kmol/m**3
+    """
         if self.coeff['LDN'].eq == 116 or self.coeff['LDN'].eq == 119: t = 1-t/self.TC
         return(eq.eq(t,self.coeff['LDN'].c,self.coeff['LDN'].eq))
     
     def SDN(self,t):
+    """solid density of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the solid density of the compound at temperature `t` in kmol/m**3
+    """
         return(eq.eq(t,self.coeff['SDN'].c,self.coeff['SDN'].eq))
     
     def ICP(self,t):
+    """ideal gas heat capacity of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the ideal gas heat capacity of the compound at temperature `t` in J/(kmol*K)
+    """
         return(eq.eq(t,self.coeff['ICP'].c,self.coeff['ICP'].eq))
     
     def LCP(self,t):
+    """liquid heat capacity of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the liquid heat capacity of the compound at temperature `t` in J/(kmol*K)
+    """
         if self.coeff['LCP'].eq == 114 or self.coeff['LCP'].eq == 124: t = 1-t/self.TC
         return(eq.eq(t,self.coeff['LCP'].c,self.coeff['LCP'].eq))
     
     def SCP(self,t):
+    """solid heat capacity of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the solid heat capacity of the compound at temperature `t` in J/(kmol*K)
+    """
         return(eq.eq(t,self.coeff['SCP'].c,self.coeff['SCP'].eq))
     
     def HVP(self,t):
+    """heat of vaporization of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the heat of vaporization of the compound at temperature `t` in J/kmol
+    """
         if self.coeff['HVP'].eq == 106: t = t/self.TC
         return(eq.eq(t,self.coeff['HVP'].c,self.coeff['HVP'].eq))
     
     def SVR(self,t):
+    """second virial coefficient of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the second virial coefficient of the compound at temperature `t` in m**3/kmol
+    """
         return(eq.eq(t,self.coeff['SVR'].c,self.coeff['SVR'].eq))
     
     def ST(self,t):
+    """ surface tension of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the surface tension of the compound at temperature `t` in N/m
+    """
         if self.coeff['ST'].eq == 106: t = t/self.TC
         return(eq.eq(t,self.coeff['ST'].c,self.coeff['ST'].eq))
     
     def LTC(self,t):
+    """ liquid thermal conductivity of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the liquid thermal conductivity of the compound at temperature `t` in W/(m*K)
+    """
         if self.coeff['LTC'].eq == 123: t = 1-t/self.TC
         return(eq.eq(t,self.coeff['LTC'].c,self.coeff['LTC'].eq))
     
     def VTC(self,t):
+    """ vapor thermal conductivity of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the vapor thermal conductivity of the compound at temperature `t` in W/(m*K)
+    """
         return(eq.eq(t,self.coeff['VTC'].c,self.coeff['VTC'].eq))
     
     def STC(self,t):
+    """ solid thermal conductivity of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the solid thermal conductivity of the compound at temperature `t` in W/(m*K)
+    """
         return(eq.eq(t,self.coeff['STC'].c,self.coeff['STC'].eq))
     
     def VP(self,t):
+    """ liquid vapor pressure of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the saturated vapor pressure of the compound at temperature `t` in Pa
+    """
         return(eq.eq(t,self.coeff['VP'].c,self.coeff['VP'].eq))
     
     def SVP(self,t):
+    """ solid vapor pressure of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the pressure of the vapor in equilibrium with the solid of the compound at temperature `t` in Pa
+    """
         return(eq.eq(t,self.coeff['SVP'].c,self.coeff['SVP'].eq))
     
     def LVS(self,t):
+    """ liquid viscosity of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the liquid viscosity of the compound at temperature `t` in Pa*s
+    """
         return(eq.eq(t,self.coeff['LVS'].c,self.coeff['LVS'].eq))
     
     def VVS(self,t):
+    """ vapor viscosity of the compound
+    
+    Parameter
+    ----------
+    t : float
+        temperature (K)
+        
+    Returns
+    -------
+    float
+        the low-pressure vapor viscosity of the compound at temperature `t` in Pa*s
+    """
         return(eq.eq(t,self.coeff['VVS'].c,self.coeff['VVS'].eq))
         
-def graph(c,p):
+def graphs(c,p):
+    """Graphs the data for the compounds in `c` for property `p`
+    
+    
+    
+    Parameters
+    ----------
+    c : list of `famcom.compound` objects
+        
+    p : string
+        DIPPR property to graph
+        Must be one of the following: MW, TC, PC, VC, ZC, MP, TPT, TPP,
+        NBP, LVOL, HFOR, GFOR, ENT, HSTD, GSTD, SSTD, HFUS, HCOM, ACEN,
+        RG, SOLP, DM, VDWA, VDWV, RI, FP, FLVL, FLTL, FLVU, FLTU, AIT,
+        HSUB, PAR, DC, LDN, SDN, ICP, LCP, SCP, HVP, SVR, ST, LTC, VTC,
+        STC, VP, SVP, LVS, VVS.
+    
+    Graphs property `p` for all compounds in `c`. If `p` is a constant
+    property, the graph is done vs molecular weight (`p` vs MW). If `p`
+    is a temperature-dependent property, the graph is `p` vs `T`.
+    Different lines will appear on the graph if multiple compounds
+    are found in `c`.
+    """
     # check if `c` is a list
     if type(c) != list:
         print('Graphing requires a list of compound objects which was not supplied.')
@@ -247,13 +423,11 @@ def graph(c,p):
             'PAR','DC']
     tprops=['LDN','SDN','ICP','LCP','SCP','HVP','SVR','ST', \
             'LTC','VTC','STC','VP','SVP','LVS','VVS']
-    
     ptype=''
     if p in cprops: ptype='const'
     elif p not in tprops:
         print('Property ' + p + ' is not a DIPPR property.')
         return()
-    
     
     # sort c on MW if MW is available
     mwindex=[i for i, x in enumerate(c) if not math.isnan(x.MW)]
@@ -267,17 +441,16 @@ def graph(c,p):
         print('No data for ' + p + ' were found in the supplied files.') 
         return()
     else:
-        #names=[c[i].name for i in cindex]
         if ptype == 'const':
+            names=[c[i].name for i in cindex]
             xdata=[c[i].MW for i in cindex]
             ydata=[getattr(c[i],p) for i in cindex]
             plt.plot(xdata,ydata,'o')
             plt.ylabel(p)
             plt.xlabel('MW')
             plt.title(p + ' vs MW')
-            #print(names)
+            print(names)
         else:
-            #names=[c[i].Name for i in cindex]  
             for i in range(len(cindex)):
                 xdata=np.linspace(c[cindex[i]].coeff[p].tmin, c[cindex[i]].coeff[p].tmax-1, 50)
                 yf=getattr(c[cindex[i]],p)
