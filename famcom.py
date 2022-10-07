@@ -48,7 +48,7 @@ def isnumber(s):
 # The class for each tdep property
 class tcoeff:
     def __init__(self):
-        self.prop=None          # property
+        self.prop=''            # property
         self.tmin=float("nan")  # min temp of correlation
         self.tmax=float("nan")  # max temp of correlation
         self.eq=float("nan")    # correlation eqation number
@@ -57,8 +57,8 @@ class tcoeff:
 # The class to hold the compound information
 class compound:
     def __init__(self):
-        self.name=None
-        self.ChemID=None
+        self.Name=''
+        self.ChemID=-1
         self.MW=float("nan")
         self.TC=float("nan")
         self.PC=float("nan")
@@ -121,46 +121,58 @@ class compound:
             linetext=linetext.split('#',1)[0].split('\t')
             if not linetext: continue # skip a line that was only comments
             # Separate the line into the key and the value pair
-            key=linetext[0]
-            val=linetext[1:]
-            # Place the key and value into the dictionary
-            data[key]=val
-        self.name=data.get('Name')[0]
-        self.ChemID=float(data.get('ChemID')[0])
-        self.MW=float(data.get('MW')[0])
-        self.TC=float(data.get('TC')[0])
-        self.PC=float(data.get('PC')[0])
-        self.VC=float(data.get('VC')[0])
-        self.ZC=float(data.get('ZC')[0])
-        self.MP=float(data.get('MP')[0])
-        self.TPT=float(data.get('TPT')[0])
-        self.TPP=float(data.get('TPP')[0])
-        self.NBP=float(data.get('NBP')[0])
-        self.LVOL=float(data.get('LVOL')[0])
-        self.HFOR=float(data.get('HFOR')[0])
-        self.GFOR=float(data.get('GFOR')[0])
-        self.ENT=float(data.get('ENT')[0])
-        self.HSTD=float(data.get('HSTD')[0])
-        self.GSTD=float(data.get('GSTD')[0])
-        self.SSTD=float(data.get('SSTD')[0])
-        self.HFUS=float(data.get('HFUS')[0])
-        self.HCOM=float(data.get('HCOM')[0])
-        self.ACEN=float(data.get('ACEN')[0])
-        self.RG=float(data.get('RG')[0])
-        self.SOLP=float(data.get('SOLP')[0])
-        self.DM=float(data.get('DM')[0])
-        self.VDWA=float(data.get('VDWA')[0])
-        self.VDWV=float(data.get('VDWV')[0])
-        self.RI=float(data.get('RI')[0])
-        self.FP=float(data.get('FP')[0])
-        self.FLVL=float(data.get('FLVL')[0])
-        self.FLTL=float(data.get('FLTL')[0])
-        self.FLVU=float(data.get('FLVU')[0])
-        self.FLTU=float(data.get('FLTU')[0])
-        self.AIT=float(data.get('AIT')[0])
-        self.HSUB=float(data.get('HSUB')[0])
-        self.PAR=float(data.get('PAR')[0])
-        self.DC=float(data.get('DC')[0])
+            if len(linetext) > 1: # ignore keys without values
+                key=linetext[0]            
+                val=linetext[1:]
+                # Place the key and value into the dictionary
+                data[key]=val
+        # Assign constant data
+        cprops=['MW','TC','PC','VC','ZC','MP','TPT','TPP','NBP','LVOL','HFOR','GFOR', \
+                'ENT','HSTD','GSTD','SSTD','HFUS','HCOM','ACEN','RG','SOLP','DM', \
+                'VDWA','VDWV','RI','FP','FLVL','FLTL','FLVU','FLTU','AIT','HSUB', \
+                'PAR','DC']
+        if 'Name' in data.keys(): self.Name=data.get('Name')[0]
+        if 'ChemID' in data.keys(): self.ChemID=int(data.get('ChemID')[0])
+        for i in cprops:
+            if i in data: # check if prop was in file
+                setattr(self, i, float(data.get(i)[0]))
+ 
+        # self.Name=data.get('Name')[0]
+        # self.ChemID=int(data.get('ChemID')[0])
+        # self.MW=float(data.get('MW')[0])
+        # self.TC=float(data.get('TC')[0])
+        # self.PC=float(data.get('PC')[0])
+        # self.VC=float(data.get('VC')[0])
+        # self.ZC=float(data.get('ZC')[0])
+        # self.MP=float(data.get('MP')[0])
+        # self.TPT=float(data.get('TPT')[0])
+        # self.TPP=float(data.get('TPP')[0])
+        # self.NBP=float(data.get('NBP')[0])
+        # self.LVOL=float(data.get('LVOL')[0])
+        # self.HFOR=float(data.get('HFOR')[0])
+        # self.GFOR=float(data.get('GFOR')[0])
+        # self.ENT=float(data.get('ENT')[0])
+        # self.HSTD=float(data.get('HSTD')[0])
+        # self.GSTD=float(data.get('GSTD')[0])
+        # self.SSTD=float(data.get('SSTD')[0])
+        # self.HFUS=float(data.get('HFUS')[0])
+        # self.HCOM=float(data.get('HCOM')[0])
+        # self.ACEN=float(data.get('ACEN')[0])
+        # self.RG=float(data.get('RG')[0])
+        # self.SOLP=float(data.get('SOLP')[0])
+        # self.DM=float(data.get('DM')[0])
+        # self.VDWA=float(data.get('VDWA')[0])
+        # self.VDWV=float(data.get('VDWV')[0])
+        # self.RI=float(data.get('RI')[0])
+        # self.FP=float(data.get('FP')[0])
+        # self.FLVL=float(data.get('FLVL')[0])
+        # self.FLTL=float(data.get('FLTL')[0])
+        # self.FLVU=float(data.get('FLVU')[0])
+        # self.FLTU=float(data.get('FLTU')[0])
+        # self.AIT=float(data.get('AIT')[0])
+        # self.HSUB=float(data.get('HSUB')[0])
+        # self.PAR=float(data.get('PAR')[0])
+        # self.DC=float(data.get('DC')[0])
         
         # tdep coefficients
         tprops=['LDN','SDN','ICP','LCP','SCP','HVP','SVR','ST', \
@@ -255,7 +267,7 @@ def graph(c,p):
         print('No data for ' + p + ' were found in the supplied files.') 
         return()
     else:
-        names=[c[i].name for i in cindex]
+        #names=[c[i].name for i in cindex]
         if ptype == 'const':
             xdata=[c[i].MW for i in cindex]
             ydata=[getattr(c[i],p) for i in cindex]
@@ -265,15 +277,15 @@ def graph(c,p):
             plt.title(p + ' vs MW')
             #print(names)
         else:
-            names=[c[i].name for i in cindex]  
+            #names=[c[i].Name for i in cindex]  
             for i in range(len(cindex)):
-                xdata=np.linspace(c[cindex[i]].coeff[p].tmin, c[cindex[i]].coeff[p].tmax, 50)
+                xdata=np.linspace(c[cindex[i]].coeff[p].tmin, c[cindex[i]].coeff[p].tmax-1, 50)
                 yf=getattr(c[cindex[i]],p)
                 ydata=yf(xdata)
                 if p in ['VP','SVP','LVS']:
                     xdata=1.0/xdata
                     ydata=np.log(ydata)
-                plt.plot(xdata,ydata,label=c[cindex[i]].name)
+                plt.plot(xdata,ydata,label=c[cindex[i]].Name)
             if p in ['VP','SVP','LVS']:
                 plt.ylabel('ln(' + p +')')
                 plt.xlabel('1/T')
